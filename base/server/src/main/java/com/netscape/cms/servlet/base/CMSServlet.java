@@ -61,6 +61,7 @@ import org.mozilla.jss.netscape.security.x509.RevokedCertImpl;
 import org.mozilla.jss.netscape.security.x509.X509CertImpl;
 import org.w3c.dom.Node;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.netscape.certsrv.authentication.IAuthToken;
 import com.netscape.certsrv.authority.IAuthority;
 import com.netscape.certsrv.authority.ICertAuthority;
@@ -109,6 +110,7 @@ import com.netscape.cmscore.request.RequestRepository;
 import com.netscape.cmscore.security.JssSubsystem;
 import com.netscape.cmscore.usrgrp.Group;
 import com.netscape.cmscore.usrgrp.UGSubsystem;
+import com.netscape.cmsutil.json.JSONObject;
 import com.netscape.cmsutil.xml.XMLObject;
 
 /**
@@ -2127,19 +2129,19 @@ public abstract class CMSServlet extends HttpServlet {
     }
 
     protected void outputError(HttpServletResponse httpResp, String status, String errorString, String requestId) {
-        XMLObject xmlObj = null;
+        JSONObject jsonObj = null;
         try {
-            xmlObj = new XMLObject();
-            Node root = xmlObj.createRoot("XMLResponse");
-            xmlObj.addItemToContainer(root, "Status", status);
-            xmlObj.addItemToContainer(root, "Error", errorString);
+            jsonObj = new JSONObject();
+            ObjectNode root = jsonObj.getRootNode();
+            root.put("Status", status);
+            root.put("Error", errorString);
             if (requestId != null) {
-                xmlObj.addItemToContainer(root, "RequestId", requestId);
+                root.put("RequestId", requestId);
             }
-            byte[] cb = xmlObj.toByteArray();
+            byte[] cb = jsonObj.toByteArray();
 
             OutputStream os = httpResp.getOutputStream();
-            httpResp.setContentType("application/xml");
+            httpResp.setContentType("application/json");
             httpResp.setContentLength(cb.length);
             os.write(cb);
             os.flush();

@@ -198,7 +198,7 @@ public class CACertClient extends Client {
         content.putSingle("profileId", profileID);
         content.putSingle("cert_request_type", certRequestType);
         content.putSingle("cert_request", certRequest);
-        content.putSingle("xmlOutput", "true");
+        content.putSingle("jsonOutput", "true");
         content.putSingle("sessionID", sessionID);
 
         if (subjectDN != null) {
@@ -235,6 +235,9 @@ public class CACertClient extends Client {
             content.putSingle("requestor_name", requestor);
         }
 
+        logger.info("CACertClient: Request content: " + content.toString());
+
+
         String response = client.post("ca/ee/ca/profileSubmit", content, String.class);
         logger.info("CACertClient: Response: " + response);
 
@@ -260,13 +263,13 @@ public class CACertClient extends Client {
             throw new IOException("Unable to generate certificate: " + error);
         }
 
-        String id = parser.getJsonNode().get("Id").asText();
+        String id = parser.getJsonNode().get("Requests").get(0).get("Id").asText();
         logger.info("CACertClient: Request ID: " + id);
 
-        String serial = parser.getJsonNode().get("serialno").asText();
+        String serial = parser.getJsonNode().get("Requests").get(0).get("serialno").asText();
         logger.info("CACertClient: Serial: " + serial);
 
-        String b64 = parser.getJsonNode().get("b64").asText();
+        String b64 = parser.getJsonNode().get("Requests").get(0).get("b64").asText();
         logger.info("CACertClient: Cert: " + b64);
 
         b64 = CryptoUtil.stripCertBrackets(b64.trim());
